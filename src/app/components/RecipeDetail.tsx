@@ -63,7 +63,7 @@ export function RecipeDetail({ recipe, onClose, onEdit, onDelete, readOnly }: Re
   return (
     <div className="fixed inset-0 bg-white z-50 overflow-y-auto">
     <div className="max-w-5xl mx-auto px-6 md:px-8 py-6 md:py-10">
-      <div className="sticky top-0 z-10 -mx-6 md:-mx-8 px-6 md:px-8 py-4 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 flex items-center justify-between">
+      <div className=" top-0 z-10 -mx-6 md:-mx-8 px-6 md:px-8 py-4 bg-white flex items-center justify-between">
         <button
           onClick={onClose}
           className="p-2 hover:bg-black hover:text-white transition-colors border border-black text-black"
@@ -72,13 +72,7 @@ export function RecipeDetail({ recipe, onClose, onEdit, onDelete, readOnly }: Re
           <X className="w-5 h-5" />
         </button>
         <div className="flex items-center gap-2 sm:gap-3">
-          <button
-            onClick={handleExportPdf}
-            className="sm:inline-flex items-center gap-2 px-3 py-2 text-xs font-bold tracking-wide text-black border border-black hover:bg-black hover:text-white transition-colors uppercase"
-          >
-            <Download className="w-4 h-4" />
-            <span>Export</span>
-          </button>
+          
           {!readOnly && (
             <>
               <button
@@ -188,6 +182,13 @@ export function RecipeDetail({ recipe, onClose, onEdit, onDelete, readOnly }: Re
                 </li>
               ))}
             </ol>
+            <button
+            onClick={handleExportPdf}
+            className="sm:inline-flex items-center gap-2 px-3 py-2 text-xs font-bold tracking-wide text-black border border-black hover:bg-black hover:text-white transition-colors uppercase"
+          >
+            <Download className="w-4 h-4" />
+            <span>Export</span>
+          </button>
           </div>
         </div>
       </div>

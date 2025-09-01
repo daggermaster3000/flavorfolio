@@ -58,7 +58,7 @@ export default function AppContent() {
 
       {/* Footer */}
       <footer className="mt-16 mb-6 text-center text-gray-400 text-sm">
-        © {new Date().getFullYear()} Flavorfolio. All rights reserved.
+        Eat well 🍕
       </footer>
     </Layout>
   );
