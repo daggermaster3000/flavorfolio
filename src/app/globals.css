@@ -1,26 +1,28 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    border-color: rgb(229 231 235); /* gray-200 */
+  }
+  body {
+    background-color: rgb(255 255 255); /* white */
+    color: rgb(17 24 39); /* gray-900 */
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
 }
+
+.font-mono {
+  font-family: var(--font-jetbrains-mono), 'SF Mono', Monaco, Inconsolata, 'Roboto Mono', Consolas, monospace;
+}
+
+/* Apply to the container you export */
+.print-container img {
+  max-width: 100%;   /* don't overflow container */
+  height: auto;      /* preserve aspect ratio */
+  object-fit: contain; /* ensures it fits without stretching */
+  display: block;    /* remove inline spacing issues */
+}
+
