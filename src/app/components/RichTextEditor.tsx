@@ -7,6 +7,7 @@ import StarterKit from '@tiptap/starter-kit';
 import Typography from '@tiptap/extension-typography';
 import { TextStyle } from '@tiptap/extension-text-style';
 import { Bold, Italic, List, ListOrdered, Quote, Minus } from 'lucide-react';
+import Link from '@tiptap/extension-link';
 
 interface RichTextEditorProps {
   content: string;
@@ -19,6 +20,12 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
       StarterKit,
       Typography,
       TextStyle,
+      Link.configure({
+        openOnClick: true,
+        HTMLAttributes: {
+          class: "text-blue-600 underline",
+        },
+      }),
     ],
     content,
     onUpdate: ({ editor }) => {
@@ -33,7 +40,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
   });
   useEffect(() => {
     if (editor && content !== editor.getHTML()) {
-      editor.commands.setContent(content); 
+      editor.commands.setContent(content);
     }
   }, [content, editor]);
 
@@ -45,14 +52,14 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
     <div className="border border-gray-200 rounded-lg bg-white">
       {/* Toolbar */}
       <div className="flex items-center gap-1 p-2 border-b border-gray-200 bg-gray-50">
-        <button
+        <button type="button"
           onClick={() => editor.chain().focus().toggleBold().run()}
           className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('bold') ? 'bg-gray-200' : ''}`}
           title="Bold"
         >
           <Bold className="w-4 h-4" />
         </button>
-        <button
+        <button type="button"
           onClick={() => editor.chain().focus().toggleItalic().run()}
           className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('italic') ? 'bg-gray-200' : ''}`}
           title="Italic"
@@ -60,38 +67,51 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
           <Italic className="w-4 h-4" />
         </button>
         <div className="w-px h-6 bg-gray-300 mx-2" />
-        <button
+        <button type="button"
           onClick={() => editor.chain().focus().toggleBulletList().run()}
           className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('bulletList') ? 'bg-gray-200' : ''}`}
           title="Bullet List"
         >
           <List className="w-4 h-4" />
         </button>
-        <button
+        <button type="button"
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
           className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('orderedList') ? 'bg-gray-200' : ''}`}
           title="Numbered List"
         >
           <ListOrdered className="w-4 h-4" />
         </button>
-        <button
+        <button type="button"
           onClick={() => editor.chain().focus().toggleBlockquote().run()}
           className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('blockquote') ? 'bg-gray-200' : ''}`}
           title="Quote"
         >
           <Quote className="w-4 h-4" />
         </button>
-        <button
+        <button type="button"
           onClick={() => editor.chain().focus().setHorizontalRule().run()}
           className="p-2 rounded hover:bg-gray-200"
           title="Horizontal Rule"
         >
           <Minus className="w-4 h-4" />
-        </button>
+        </button>  
+        <button type="button"
+        onClick={() => {
+          const url = prompt("Enter URL");
+          if (url) {
+            editor.chain().focus().setLink({ href: url }).run();
+          }
+        }}
+        className="p-2 rounded hover:bg-gray-200"
+        title="Insert Link"
+      >
+        🔗
+      </button>
       </div>
-      
+    
       {/* Editor Content */}
       <EditorContent editor={editor} />
+
     </div>
   );
 }

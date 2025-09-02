@@ -84,7 +84,14 @@ export function RecipeForm({ onClose, onSuccess, initialRecipe }: RecipeFormProp
       console.log(recipeData)
       
       // Populate the form with parsed data
-      const htmlDescription = `<p>${recipeData.description || ''}</p>`;
+      const htmlDescription = `
+  <p>
+    ${recipeData.description || ''} 
+    <a href="${recipeData.tiktok_url}" style="color: blue; text-decoration: underline;" target="_blank" rel="noopener noreferrer">
+      View on TikTok
+    </a>
+  </p>
+`;
 
 
       setFormData({

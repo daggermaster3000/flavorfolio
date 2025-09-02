@@ -18,11 +18,27 @@ const config: Config = {
 }
 module.exports = {
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        slate: {
+          500: '#64748b', // instead of oklab()
+        },
+        // repeat for other problem colors
+      }
+    }
+  
   },
   future: {
     // Force Tailwind to use rgb() instead of oklab()
     disableExperimentalCssOklab: true,
+  },
+  plugins: {
+    'postcss-preset-env': {
+      stage: 1,
+      features: {
+        'color-functional-notation': { preserve: true },
+      },
+    },
   },
 }
 

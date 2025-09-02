@@ -121,8 +121,13 @@ export async function POST(request: NextRequest) {
 
     const data = await response.json();
     const recipeData = JSON.parse(data.choices[0].message.content);
-    console.log(recipeData)
-    return NextResponse.json(recipeData);
+    const finalData = {
+      ...recipeData,
+      tiktok_url: resolvedUrl,
+    };
+
+    console.log(finalData);
+    return NextResponse.json(finalData);
   } catch (error) {
     console.error("Error parsing recipe:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

@@ -182,13 +182,13 @@ export function RecipeDetail({ recipe, onClose, onEdit, onDelete, readOnly }: Re
                 </li>
               ))}
             </ol>
-            <button
+            {/* <button
             onClick={handleExportPdf}
             className="sm:inline-flex items-center gap-2 px-3 py-2 text-xs font-bold tracking-wide text-black border border-black hover:bg-black hover:text-white transition-colors uppercase"
           >
             <Download className="w-4 h-4" />
             <span>Export</span>
-          </button>
+          </button> */}
           </div>
         </div>
       </div>
