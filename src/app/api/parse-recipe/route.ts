@@ -82,21 +82,31 @@ export async function POST(request: NextRequest) {
     // Step 3: Call OpenAI to parse recipe
     const openaiApiKey = process.env.OPENAI_API_KEY;
     const prompt = `
-      Parse the following TikTok recipe description and return only a JSON object with these keys (if protein and calories are lacking, estimate from the rest of the recipe). Feature emojis in the ingredients and for the description use a borderline joke:
-      - title (string)
-      - description (string)
-      - ingredients (array of strings)
-      - steps (array of strings)
-      - prep_time (number, minutes)
-      - cook_time (number, minutes)
-      - servings (number)
-      - tags (array of strings, maximum 3)
-      - protein (grams)
-      - calories (Cal)
+    You are a precise recipe parser. Extract structured information from the following TikTok recipe description.  
 
-      TikTok description + url link:
-      ${tiktokDescription}
+    ⚠️ Rules:
+    - Output **only valid JSON** with the exact keys listed below.
+    - Do not include any commentary or text outside the JSON.
+    - If a value is missing (protein, calories, servings), make a reasonable estimate.
+    - Preserve **all steps from the recipe** in the same logical order, even if they seem redundant.
+    - If steps are unclear or merged, split them into clear cooking actions.
+
+    Formatting rules:
+    - title: short string
+    - description: playful one-liner with a borderline joke
+    - ingredients: array of strings (include relevant emojis for each item)
+    - steps: array of concise cooking instructions (cover every step, no skipping)
+    - prep_time: number (minutes)
+    - cook_time: number (minutes)
+    - servings: number
+    - tags: array of up to 3 strings (e.g., cuisine, style, diet)
+    - protein: number (grams)
+    - calories: number (Cal)
+
+    TikTok description and URL:
+    ${tiktokDescription}
     `;
+
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",

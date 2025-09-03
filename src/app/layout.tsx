@@ -1,6 +1,8 @@
+// src/app/layout.tsx
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import Providers from "./providers"; // Import the new Providers component
 
 const inter = Inter({
   variable: "--font-inter",
@@ -33,15 +35,13 @@ export default function RootLayout({
         <link rel="apple-touch-icon" sizes="167x167" href="/icons/apple-touch-icon.png" />
         <link rel="apple-touch-icon" sizes="152x152" href="/icons/apple-touch-icon.png" />
         <link rel="apple-touch-icon" sizes="120x120" href="/icons/apple-touch-icon.png" />     
-      <link rel="manifest" href="/manifest.json" />
-     </head>
+        <link rel="manifest" href="/manifest.json" />
+      </head>
       
-      
-
-      <body
-        className={`${inter.variable} ${jetbrainsMono.variable} antialiased`}
-      >
-        {children}
+      <body className={`${inter.variable} ${jetbrainsMono.variable} antialiased`}>
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );

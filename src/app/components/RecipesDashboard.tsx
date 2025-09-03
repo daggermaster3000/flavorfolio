@@ -8,6 +8,7 @@ import { RecipeForm } from './RecipeForm';
 import { RecipeDetail } from './RecipeDetail';
 import { Plus, Search } from 'lucide-react';
 
+
 export function RecipesDashboard() {
   const { user } = useAuth();
   const [recipes, setRecipes] = useState<Recipe[]>([]);

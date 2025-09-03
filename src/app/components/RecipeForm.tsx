@@ -259,6 +259,7 @@ export function RecipeForm({ onClose, onSuccess, initialRecipe }: RecipeFormProp
         user_id: user.id,
         author_id: user.id,
         author_name: user.user_metadata?.username || user.email,
+        avatar_url: user.user_metadata?.avatar_url || null,
       };
 
       if (initialRecipe?.id) {
