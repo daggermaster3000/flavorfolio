@@ -12,20 +12,30 @@ export function ExploreFeed() {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTags, setActiveTags] = useState<string[]>([]);
 
-  const loadAllRecipes = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('recipes')
-        .select('*')
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      setRecipes(data || []);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Corrected loadAllRecipes function
+const loadAllRecipes = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('recipes')
+      .select(
+        `
+        *,
+        author:profiles!author_id(
+          username,
+          avatar_url
+        )
+      `
+      )
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    setRecipes(data || []);
+  } catch (err) {
+    console.error('An unexpected error occurred:', err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     loadAllRecipes();

@@ -3,6 +3,8 @@
 import React, { useRef } from 'react';
 import { Recipe } from '../lib/supabase';
 import { X, Clock, User, Users, Edit3, Trash2, Download } from 'lucide-react';
+import { metadata } from '../layout';
+
 
 interface AuthorDetails {
   username?: string | null;
@@ -23,7 +25,7 @@ export function RecipeDetail({ recipe, onClose, onEdit, onDelete, readOnly }: Re
 
   const authorName = recipe.author?.username || recipe.author_name || 'Unknown';
   const authorAvatarUrl = recipe.author?.avatar_url || null;
-  console.log(recipe.author?.avatar_url)
+  console.log(recipe)
   const handleExportPdf = async () => {
     if (!printRef.current) return;
 

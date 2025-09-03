@@ -22,21 +22,26 @@ export function RecipesDashboard() {
     if (!user) return;
     
     try {
-      const { data, error } = await supabase
-        .from('recipes')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      setRecipes(data || []);
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        console.error('Error loading recipes:', err);
+        const { data, error } = await supabase
+          .from('recipes')
+          .select(
+            `
+            *,
+            author:profiles!author_id(
+              username,
+              avatar_url
+            )
+          `
+          )
+          .order('created_at', { ascending: false });
+    
+        if (error) throw error;
+        setRecipes(data || []);
+      } catch (err) {
+        console.error('An unexpected error occurred:', err);
+      } finally {
+        setLoading(false);
       }
-    } finally {
-      setLoading(false);
-    }
   }, [user]);
 
   useEffect(() => {
