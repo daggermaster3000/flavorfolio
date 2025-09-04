@@ -4,7 +4,7 @@ import React, { useRef } from 'react';
 import { Recipe } from '../lib/supabase';
 import { X, Clock, User, Users, Edit3, Trash2, Download } from 'lucide-react';
 import { metadata } from '../layout';
-
+import { Flame, Droplets } from 'lucide-react'; // Import new icons
 
 interface AuthorDetails {
   username?: string | null;
@@ -155,6 +155,23 @@ export function RecipeDetail({ recipe, onClose, onEdit, onDelete, readOnly }: Re
               <div className="inline-flex items-center gap-2">
                 <Users className="w-4 h-4" /> Serves {recipe.servings}
               </div>
+              {/* New: Protein and Calories */}
+              {recipe.protein && (
+                <>
+                  <span className="hidden sm:inline-block w-px h-4 bg-black/20" />
+                  <div className="inline-flex items-center gap-2">
+                    <Droplets className="w-4 h-4" /> {recipe.protein}g protein
+                  </div>
+                </>
+              )}
+              {recipe.calories && (
+                <>
+                  <span className="hidden sm:inline-block w-px h-4 bg-black/20" />
+                  <div className="inline-flex items-center gap-2">
+                    <Flame className="w-4 h-4" /> {recipe.calories} cal
+                  </div>
+                </>
+              )}
             </div>
 
             {recipe.description && (

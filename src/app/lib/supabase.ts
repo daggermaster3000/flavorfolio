@@ -24,8 +24,8 @@ export type Recipe = {
   prep_time: number;
   cook_time: number;
   servings: number;
-  // protein: number;
-  // calories: number;
+  protein: number;
+  calories: number;
   user_id: string;
   author_id?: string | null;
   author_name?: string | null;

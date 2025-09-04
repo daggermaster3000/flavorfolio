@@ -21,6 +21,9 @@ interface RecipeFormProps {
     steps: string[];
     step_items?: Array<{ text: string; image_url?: string | null }> | null;
     tags?: string[];
+    // Add new fields to the initialRecipe type
+    calories?: number | null;
+    protein?: number | null;
   } | null;
 }
 
@@ -40,6 +43,9 @@ export function RecipeForm({ onClose, onSuccess, initialRecipe }: RecipeFormProp
     prep_time: initialRecipe?.prep_time ?? 0,
     cook_time: initialRecipe?.cook_time ?? 0,
     servings: initialRecipe?.servings ?? 1,
+    // Initialize new state fields for calories and protein
+    calories: initialRecipe?.calories ?? null,
+    protein: initialRecipe?.protein ?? null,
   });
   
   const [ingredients, setIngredients] = useState(initialRecipe?.ingredients?.length ? initialRecipe.ingredients : ['']);
@@ -56,17 +62,12 @@ export function RecipeForm({ onClose, onSuccess, initialRecipe }: RecipeFormProp
   );
 
 
-
-
   // Function to parse TikTok recipe
   const parseTikTokRecipe = async () => {
     if (!tiktokLink.trim()) return;
     
     setParsingRecipe(true);
     try {
-      // Extract description from TikTok link (this is a simplified approach)
-      // In a real implementation, you might want to use TikTok's API or web scraping
-
       const response = await fetch('/api/parse-recipe', {
         method: 'POST',
         headers: {
@@ -81,25 +82,26 @@ export function RecipeForm({ onClose, onSuccess, initialRecipe }: RecipeFormProp
       }
 
       const recipeData = await response.json();
-      console.log(recipeData)
+      console.log(recipeData); // For debugging purposes
       
-      // Populate the form with parsed data
       const htmlDescription = `
-  <p>
-    ${recipeData.description || ''} 
-    <a href="${recipeData.tiktok_url}" style="color: blue; text-decoration: underline;" target="_blank" rel="noopener noreferrer">
-      View on TikTok
-    </a>
-  </p>
-`;
+        <p>
+          ${recipeData.description || ''} 
+          <a href="${recipeData.tiktok_url}" style="color: blue; text-decoration: underline;" target="_blank" rel="noopener noreferrer">
+            View on TikTok
+          </a>
+        </p>
+      `;
 
-
+      // Populate the form with parsed data, including new fields
       setFormData({
         title: recipeData.title,
         description: htmlDescription,
         prep_time: recipeData.prep_time,
         cook_time: recipeData.cook_time,
         servings: recipeData.servings,
+        calories: recipeData.calories, // Populate new fields
+        protein: recipeData.protein, // Populate new fields
       });
       
       setIngredients(recipeData.ingredients.length > 0 ? recipeData.ingredients : ['']);
@@ -256,6 +258,9 @@ export function RecipeForm({ onClose, onSuccess, initialRecipe }: RecipeFormProp
         prep_time: formData.prep_time,
         cook_time: formData.cook_time,
         servings: formData.servings,
+        // Add new fields to the payload
+        calories: formData.calories,
+        protein: formData.protein,
         user_id: user.id,
         author_id: user.id,
         author_name: user.user_metadata?.username || user.email,
@@ -376,7 +381,7 @@ export function RecipeForm({ onClose, onSuccess, initialRecipe }: RecipeFormProp
                   {parsingRecipe ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      Parsing...
+                      
                     </>
                   ) : (
                     <>
@@ -445,7 +450,38 @@ export function RecipeForm({ onClose, onSuccess, initialRecipe }: RecipeFormProp
             />
           </div>
         </div>
-
+        
+        {/* New fields for Calories and Protein */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div>
+            <label className="block text-sm font-bold tracking-wide text-black uppercase mb-2 font-mono">
+              Calories
+            </label>
+            <input
+              type="number"
+              value={formData.calories ?? ''}
+              onChange={(e) => setFormData({ ...formData, calories: parseInt(e.target.value) || null })}
+              min="0"
+              className="w-full px-4 py-3 border border-black focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+              placeholder="e.g., 450"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-bold tracking-wide text-black uppercase mb-2 font-mono">
+              Protein (g)
+            </label>
+            <input
+              type="number"
+              value={formData.protein ?? ''}
+              onChange={(e) => setFormData({ ...formData, protein: parseInt(e.target.value) || null })}
+              min="0"
+              className="w-full px-4 py-3 border border-black focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+              placeholder="e.g., 30"
+            />
+          </div>
+        </div>
+        
         <div>
           <label className="block text-sm font-bold tracking-wide text-black uppercase mb-2 font-mono">
             Description
