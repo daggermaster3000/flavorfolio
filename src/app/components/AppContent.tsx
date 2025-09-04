@@ -50,7 +50,7 @@ export default function AppContent() {
             Hi, {firstName}!
           </h2>
           <p className="text-gray-500 text-lg font-medium">
-            Let's get cooking. 🍳
+            Let&apos;s get cooking. 🍳
           </p>
         
 
