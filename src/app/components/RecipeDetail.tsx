@@ -151,14 +151,14 @@ export function RecipeDetail({ recipe, onClose, onEdit, onDelete, readOnly }: Re
               <div className="inline-flex items-center gap-2">
                 <Clock className="w-4 h-4" /> {totalTime} min total
               </div>
-              <span className="hidden sm:inline-block w-px h-4 bg-black/20" />
+              <span className=" sm:inline-block w-px h-4 bg-black/20" />
               <div className="inline-flex items-center gap-2">
                 <Users className="w-4 h-4" /> Serves {recipe.servings}
               </div>
               {/* New: Protein and Calories */}
               {recipe.protein && (
                 <>
-                  <span className="hidden sm:inline-block w-px h-4 bg-black/20" />
+                  <span className=" sm:inline-block w-px h-4 bg-black/20" />
                   <div className="inline-flex items-center gap-2">
                     <Droplets className="w-4 h-4" /> {recipe.protein}g protein
                   </div>
@@ -166,7 +166,7 @@ export function RecipeDetail({ recipe, onClose, onEdit, onDelete, readOnly }: Re
               )}
               {recipe.calories && (
                 <>
-                  <span className="hidden sm:inline-block w-px h-4 bg-black/20" />
+                  <span className=" sm:inline-block w-px h-4 bg-black/20" />
                   <div className="inline-flex items-center gap-2">
                     <Flame className="w-4 h-4" /> {recipe.calories} cal
                   </div>

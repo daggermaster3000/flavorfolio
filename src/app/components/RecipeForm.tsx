@@ -33,6 +33,9 @@ export function RecipeForm({ onClose, onSuccess, initialRecipe }: RecipeFormProp
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(initialRecipe?.image_url ?? null);
   
+  // State for AI Image Parsing
+  const [parsingImage, setParsingImage] = useState(false);
+  
   // TikTok parsing state
   const [tiktokLink, setTiktokLink] = useState('');
   const [parsingRecipe, setParsingRecipe] = useState(false);
@@ -128,6 +131,52 @@ export function RecipeForm({ onClose, onSuccess, initialRecipe }: RecipeFormProp
       const reader = new FileReader();
       reader.onload = () => setImagePreview(reader.result as string);
       reader.readAsDataURL(file);
+    }
+  };
+
+  // New function to handle AI image parsing
+  const handleAIImageParse = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setParsingImage(true);
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      // Call your backend API endpoint for image parsing
+      const response = await fetch('/api/parse-recipe-image', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to parse recipe from image');
+      }
+
+      const recipeData = await response.json();
+
+      // Populate the form with parsed data
+      setFormData({
+        title: recipeData.title || '',
+        description: recipeData.description || '',
+        prep_time: recipeData.prep_time || 0,
+        cook_time: recipeData.cook_time || 0,
+        servings: recipeData.servings || 1,
+        calories: recipeData.calories || null,
+        protein: recipeData.protein || null,
+      });
+      setIngredients(recipeData.ingredients?.length > 0 ? recipeData.ingredients : ['']);
+      setSteps(recipeData.steps?.length > 0 ? recipeData.steps : ['']);
+      setStepItems(recipeData.steps?.length > 0 ? recipeData.steps.map((s: string) => ({ text: s })) : [{ text: '' }]);
+      setTags(recipeData.tags || []);
+
+    } catch (error) {
+      console.error('Error parsing recipe from image:', error);
+      alert('Failed to parse recipe from image. Please try again or fill in the form manually.');
+    } finally {
+      setParsingImage(false);
     }
   };
 
@@ -251,14 +300,13 @@ export function RecipeForm({ onClose, onSuccess, initialRecipe }: RecipeFormProp
         title: formData.title,
         description: formData.description,
         ingredients: ingredients.filter(i => i.trim()),
-        steps: steps.filter(s => s.trim()),
+        steps: stepImageUrls.map(item => item.text).filter(s => s.trim()), // <-- Corrected line
         step_items: stepImageUrls,
         tags: tags.filter(t => t.trim()),
         image_url: imageUrl,
         prep_time: formData.prep_time,
         cook_time: formData.cook_time,
         servings: formData.servings,
-        // Add new fields to the payload
         calories: formData.calories,
         protein: formData.protein,
         user_id: user.id,
@@ -268,7 +316,6 @@ export function RecipeForm({ onClose, onSuccess, initialRecipe }: RecipeFormProp
       };
 
       if (initialRecipe?.id) {
-        // Update existing recipe
         const { error } = await supabase
           .from('recipes')
           .update(recipeData)
@@ -276,12 +323,11 @@ export function RecipeForm({ onClose, onSuccess, initialRecipe }: RecipeFormProp
 
         if (error) throw error;
       } else {
-        // Create new recipe
         const { error } = await supabase
           .from('recipes')
           .insert([recipeData]);
-
-        if (error) throw error;
+        console.log(recipeData)
+        if (error) throw console.error(error);
       }
 
       onSuccess();
@@ -289,6 +335,7 @@ export function RecipeForm({ onClose, onSuccess, initialRecipe }: RecipeFormProp
       if (err instanceof Error) {
         alert('Error saving recipe: ' + err.message);
       } else {
+        
         alert('An unknown error occurred');
       }
     } finally {
@@ -310,7 +357,79 @@ export function RecipeForm({ onClose, onSuccess, initialRecipe }: RecipeFormProp
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-12">
-        {/* Image Upload */}
+        {/* AI Image Parsing Section */}
+        <div className="bg-gradient-to-r from-teal-50 to-cyan-50 border border-teal-200 rounded-lg p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Sparkles className="w-5 h-5 text-teal-600" />
+            <h3 className="text-sm font-bold tracking-wide text-teal-800 uppercase font-mono">
+              AI Photo Parser
+            </h3>
+          </div>
+          <p className="text-sm text-teal-700 mb-3">
+            Upload a photo of a recipe and let AI extract the details for you!
+          </p>
+          <div className="flex gap-2 items-center">
+            <label
+              htmlFor="ai-photo-upload"
+              className="flex-1 px-3 py-2 border border-teal-300 rounded focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm cursor-pointer hover:bg-teal-100 transition-colors flex items-center gap-2 font-medium"
+            >
+              <Upload className="w-4 h-4" />
+              <span>{parsingImage ? 'Parsing...' : 'Choose a photo...'}</span>
+              <input
+                id="ai-photo-upload"
+                type="file"
+                className="hidden"
+                accept="image/*"
+                onChange={handleAIImageParse}
+                disabled={parsingImage}
+              />
+            </label>
+            {parsingImage && (
+              <Loader2 className="w-4 h-4 animate-spin text-teal-600" />
+            )}
+          </div>
+        </div>
+
+        {/* TikTok Recipe Parser */}
+        <div className="bg-gradient-to-r from-pink-50 to-purple-50 border border-pink-200 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Sparkles className="w-5 h-5 text-pink-600" />
+                <h3 className="text-sm font-bold tracking-wide text-pink-800 uppercase font-mono">
+                  AI Recipe Parser
+                </h3>
+              </div>
+              <p className="text-sm text-pink-700 mb-3">
+                Paste a TikTok recipe link and let AI extract the recipe details for you!
+              </p>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={tiktokLink}
+                  onChange={(e) => setTiktokLink(e.target.value)}
+                  placeholder="Paste TikTok recipe link here..."
+                  className="flex-1 px-3 py-2 border border-pink-300 rounded focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={parseTikTokRecipe}
+                  disabled={!tiktokLink.trim() || parsingRecipe}
+                  className="px-1 py-2 bg-pink-600 text-white rounded hover:bg-pink-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm font-medium"
+                >
+                  {parsingRecipe ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4 " />
+                      Parse 
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
+        {/* Image Upload (Existing) */}
         <div>
           <label className="block text-sm font-bold tracking-wide text-black uppercase mb-4 font-mono">
             Photo
@@ -352,46 +471,6 @@ export function RecipeForm({ onClose, onSuccess, initialRecipe }: RecipeFormProp
             )}
           </div>
         </div>
-
-        {/* TikTok Recipe Parser */}
-        <div className="bg-gradient-to-r from-pink-50 to-purple-50 border border-pink-200 rounded-lg p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <Sparkles className="w-5 h-5 hidden text-pink-600" />
-                <h3 className="text-sm font-bold tracking-wide text-pink-800 uppercase font-mono">
-                  AI Recipe Parser
-                </h3>
-              </div>
-              <p className="text-sm text-pink-700 mb-3">
-                Paste a TikTok recipe link and let AI extract the recipe details for you!
-              </p>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={tiktokLink}
-                  onChange={(e) => setTiktokLink(e.target.value)}
-                  placeholder="Paste TikTok recipe link here..."
-                  className="flex-1 px-3 py-2 border border-pink-300 rounded focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm"
-                />
-                <button
-                  type="button"
-                  onClick={parseTikTokRecipe}
-                  disabled={!tiktokLink.trim() || parsingRecipe}
-                  className="px-1 py-2 bg-pink-600 text-white rounded hover:bg-pink-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm font-medium"
-                >
-                  {parsingRecipe ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="w-4 h-4 " />
-                      Parse 
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
 
         {/* Basic Info */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

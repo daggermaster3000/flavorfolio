@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
 
     Formatting rules:
     - title: short string
-    - description: playful one-liner with a borderline joke
+    - description: playful one-liner with an edgy joke
     - ingredients: array of strings (include relevant emojis for each item)
     - steps: array of concise cooking instructions (cover every step, no skipping)
     - prep_time: number (minutes)

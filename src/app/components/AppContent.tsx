@@ -43,7 +43,7 @@ export default function AppContent() {
         <motion.div
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 1, delay: 0.2 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
           className="mt-8 mb-12 text-center md:text-left"
         >
           <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-black mb-2">
@@ -81,7 +81,7 @@ export default function AppContent() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 1 }}
+            transition={{ duration: 0.5}}
           >
             {view === 'my' ? <RecipesDashboard /> : <ExploreFeed />}
           </motion.div>
