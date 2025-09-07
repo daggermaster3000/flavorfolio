@@ -3,6 +3,7 @@ import React, { useRef } from 'react';
 import { Recipe } from '../lib/supabase';
 import { X, Clock, User, Users, Edit3, Trash2, Download } from 'lucide-react';
 import { metadata } from '../layout';
+import Link from "next/link";
 
 interface RecipeCardProps {
   
@@ -56,19 +57,21 @@ export function RecipeCard({ recipe, onClick }: RecipeCardProps) {
     </div>
     
     {/* The profile picture on the right side */}
-    <div className="flex-shrink-0 w-10 h-10 rounded-full overflow-hidden border-2 border-black">
-      {authorAvatarUrl ? (
-        <img
-          src={authorAvatarUrl}
-          alt={`${authorName}'s avatar`}
-          className="w-full h-full object-cover"
-        />
-      ) : (
-        <div className="w-full h-full flex items-center justify-center bg-gray-200">
-          <User className="w-6 h-6 text-gray-500" />
-        </div>
-      )}
-    </div>
+    <div className="flex-shrink-0 w-10 h-10  hover:scale-150 transition-transform duration-300 rounded-full overflow-hidden border-1 border-black">
+  <Link href={`/profile/${recipe.author_id}`}>
+    {authorAvatarUrl ? (
+      <img
+        src={authorAvatarUrl}
+        alt={`${authorName}'s avatar`}
+        className="w-full h-full object-cover "
+      />
+    ) : (
+      <div className="w-full h-full flex items-center justify-center bg-gray-200">
+        <User className="w-6 h-6 text-gray-500" />
+      </div>
+    )}
+  </Link>
+</div>
   </div>
 
   {Array.isArray(recipe.tags) && recipe.tags.length > 0 && (
