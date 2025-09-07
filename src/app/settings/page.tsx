@@ -53,48 +53,55 @@ export default function SettingsPage() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) return;
+  e.preventDefault();
+  if (!user) return;
 
-    setLoading(true);
-    setMessage('');
-    setError('');
+  setLoading(true);
+  setMessage('');
+  setError('');
 
-    try {
-      let updated = false;
+  try {
+    let updated = false;
 
-      // ✅ Update username + bio in profiles table
-      if (username.trim().length < 3) {
-        throw new Error('Username must be at least 3 characters long.');
-      }
-
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({
-          username: username.trim(),
-          bio: bio.trim(),
-        })
-        .eq('id', user.id);
-
-      if (profileError) throw profileError;
-      updated = true;
-
-      // ✅ Update avatar
-      if (avatarFile) {
-        const { error: avatarError } = await updateProfilePicture(avatarFile);
-        if (avatarError) throw avatarError;
-        updated = true;
-      }
-
-      setMessage(updated ? 'Profile updated successfully!' : 'No changes to save.');
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
-      setError(`Update failed: ${errorMessage}`);
-    } finally {
-      setLoading(false);
-      setAvatarFile(null);
+    if (username.trim().length < 3) {
+      throw new Error('Username must be at least 3 characters long.');
     }
-  };
+
+    // ✅ Update profiles table
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({
+        username: username.trim(),
+        bio: bio.trim(),
+      })
+      .eq('id', user.id);
+    if (profileError) throw profileError;
+    updated = true;
+
+    // ✅ Update Supabase Auth user metadata
+    const { error: authError } = await supabase.auth.updateUser({
+      data: { username: username.trim() },
+    });
+    if (authError) throw authError;
+    updated = true;
+
+    // ✅ Update avatar
+    if (avatarFile) {
+      const { error: avatarError } = await updateProfilePicture(avatarFile);
+      if (avatarError) throw avatarError;
+      updated = true;
+    }
+
+    setMessage(updated ? 'Profile updated successfully!' : 'No changes to save.');
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
+    setError(`Update failed: ${errorMessage}`);
+  } finally {
+    setLoading(false);
+    setAvatarFile(null);
+  }
+};
+
 
   if (!user) {
     return (
