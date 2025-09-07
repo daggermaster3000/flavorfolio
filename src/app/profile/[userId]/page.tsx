@@ -4,9 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { supabase } from '../../lib/supabase';
 import { Recipe } from '../../lib/supabase';
-import { RecipeCard } from '../../components/RecipeCard';
 import { ArrowLeft } from 'lucide-react';
-import { RecipeThumbnail } from '@/app/components/recipeThumbnail'; 
 
 interface Profile {
   id: string;
@@ -64,14 +62,15 @@ export default function ProfilePage() {
   return (
     <div className="p-4 max-w-3xl mx-auto">
       {/* Header with Back Button */}
-      <div className="flex items-center mb-6">
+      <div className="flex items-center mb-8">
         <button
           onClick={() => router.back()}
-          className="p-2 rounded-full hover:bg-gray-100"
+          className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+          aria-label="Go back"
         >
           <ArrowLeft className="w-6 h-6" />
         </button>
-        <h1 className="flex-1 text-center text-lg font-semibold">
+        <h1 className="flex-1 text-center text-lg font-semibold text-black">
           {profile?.username || 'Profile'}
         </h1>
         <div className="w-6" /> {/* spacer for symmetry */}
@@ -79,8 +78,9 @@ export default function ProfilePage() {
 
       {/* Profile Header */}
       {profile && (
-        <div className="flex flex-col items-center text-center mb-8">
-          <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-black">
+        <div className="flex flex-col items-center text-center mb-10">
+          {/* Avatar */}
+          <div className="w-28 h-28 rounded-full overflow-hidden border-2 border-black shadow-sm">
             {profile.avatar_url ? (
               <img
                 src={profile.avatar_url}
@@ -88,30 +88,34 @@ export default function ProfilePage() {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500 text-xl">
+              <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500 text-2xl font-bold">
                 ?
               </div>
             )}
           </div>
-          <h1 className="text-xl font-bold mt-3">
+
+          {/* Username + Bio */}
+          <h1 className="text-xl font-bold mt-4 text-black">
             {profile.username || 'Unknown User'}
           </h1>
           {profile.bio && (
-            <p className="text-gray-600 text-sm mt-1 max-w-xs">{profile.bio}</p>
+            <p className="text-gray-600 text-sm mt-2 max-w-sm leading-snug">
+              {profile.bio}
+            </p>
           )}
 
           {/* Stats Section */}
-          <div className="flex space-x-6 mt-4">
+          <div className="flex space-x-10 mt-6">
             <div className="text-center">
-              <p className="font-bold">{recipes.length}</p>
+              <p className="font-bold text-black">{recipes.length}</p>
               <p className="text-xs text-gray-500">Recipes</p>
             </div>
             <div className="text-center">
-              <p className="font-bold">0</p>
+              <p className="font-bold text-black">0</p>
               <p className="text-xs text-gray-500">Followers</p>
             </div>
             <div className="text-center">
-              <p className="font-bold">0</p>
+              <p className="font-bold text-black">0</p>
               <p className="text-xs text-gray-500">Following</p>
             </div>
           </div>
@@ -119,21 +123,31 @@ export default function ProfilePage() {
       )}
 
       {/* Recipes Grid */}
-      <div className="flex flex-wrap gap-1">
-  {recipes.map((recipe) => (
-    <div
-      key={recipe.id}
-      className="w-1/3 aspect-square"
-    >
-      <RecipeThumbnail
-        recipe={recipe}
-        onClick={() => console.log('Open recipe', recipe.id)}
-      />
-    </div>
-  ))}
-</div>
-
-     
+      <div className="grid grid-cols-3 gap-2">
+        {recipes.map((recipe) => (
+          <div
+            key={recipe.id}
+            className="aspect-square relative group cursor-pointer"
+            onClick={() => console.log('Open recipe', recipe.id)}
+          >
+            {recipe.image_url ? (
+              <img
+                src={recipe.image_url}
+                alt={recipe.title}
+                className="w-full h-full object-cover rounded-md"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500 text-sm rounded-md">
+                No Image
+              </div>
+            )}
+            {/* Title overlay */}
+            <div className="absolute font-mono bottom-0 left-0 right-0 bg-black/60 text-white text-xs text-center py-1 truncate">
+              {recipe.title}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

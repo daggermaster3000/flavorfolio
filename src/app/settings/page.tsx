@@ -7,10 +7,11 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function SettingsPage() {
-  const { user, updateProfilePicture } = useAuth(); // ✅ remove updateUsername
+  const { user, updateProfilePicture } = useAuth();
   const router = useRouter();
 
   const [username, setUsername] = useState('');
+  const [bio, setBio] = useState('');
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
@@ -18,14 +19,14 @@ export default function SettingsPage() {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
-  // ✅ Load username from profiles table instead of user_metadata
+  // ✅ Load username, bio, and avatar from profiles table
   useEffect(() => {
     if (!user) return;
 
     const fetchProfile = async () => {
       const { data, error } = await supabase
         .from('profiles')
-        .select('username, avatar_url')
+        .select('username, avatar_url, bio')
         .eq('id', user.id)
         .single();
 
@@ -34,6 +35,7 @@ export default function SettingsPage() {
         setError('Failed to load profile.');
       } else if (data) {
         setUsername(data.username || '');
+        setBio(data.bio || '');
         setAvatarPreview(data.avatar_url || null);
       }
     };
@@ -61,17 +63,20 @@ export default function SettingsPage() {
     try {
       let updated = false;
 
-      // ✅ Update username in profiles table
+      // ✅ Update username + bio in profiles table
       if (username.trim().length < 3) {
         throw new Error('Username must be at least 3 characters long.');
       }
 
-      const { error: usernameError } = await supabase
+      const { error: profileError } = await supabase
         .from('profiles')
-        .update({ username: username.trim() })
+        .update({
+          username: username.trim(),
+          bio: bio.trim(),
+        })
         .eq('id', user.id);
 
-      if (usernameError) throw usernameError;
+      if (profileError) throw profileError;
       updated = true;
 
       // ✅ Update avatar
@@ -115,16 +120,15 @@ export default function SettingsPage() {
         </h1>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-x-12 gap-y-16">
-        {/* Left Column */}
-        <div className="hidden md:flex flex-col font-mono text-black space-y-24 mt-12">
-          <h2 className="text-xl font-bold tracking-tight">Profile Picture</h2>
-          <h2 className="text-xl font-bold tracking-tight">Username</h2>
-        </div>
-
-        {/* Right Column */}
-        <form onSubmit={handleSubmit} className="space-y-12 md:space-y-24">
+      <form onSubmit={handleSubmit} className="space-y-16">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-x-12 gap-y-12">
           {/* Avatar */}
+          <label
+            htmlFor="avatar-upload"
+            className="text-xl font-bold tracking-tight text-black font-mono self-center"
+          >
+            Profile Picture
+          </label>
           <div className="flex items-center gap-6 md:gap-8">
             <div className="relative group">
               <label htmlFor="avatar-upload" className="cursor-pointer block">
@@ -155,35 +159,53 @@ export default function SettingsPage() {
           </div>
 
           {/* Username */}
-          <div>
-            <label htmlFor="username" className="block text-xl font-bold tracking-tight text-black mb-4 md:hidden">
-              Username
-            </label>
-            <input
-              id="username"
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              disabled={loading}
-              className="w-full px-4 py-3 border-b-2 border-black focus:outline-none focus:ring-0 focus:border-red-500 text-black placeholder-gray-400 transition-colors bg-transparent font-mono"
-              placeholder="Enter your username"
-            />
-          </div>
+          <label
+            htmlFor="username"
+            className="text-xl font-bold tracking-tight text-black font-mono self-center"
+          >
+            Username
+          </label>
+          <input
+            id="username"
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            disabled={loading}
+            className="w-full px-4 py-3 border-b-2 border-black focus:outline-none focus:ring-0 focus:border-red-500 text-black placeholder-gray-400 transition-colors bg-transparent font-mono"
+            placeholder="Enter your username"
+          />
 
-          {/* Submit */}
-          <div className="mt-16 pt-8 border-t border-gray-200">
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full px-12 py-4 bg-black text-white font-bold tracking-widest uppercase hover:bg-gray-800 disabled:opacity-50 transition-colors duration-200 font-mono flex items-center justify-center space-x-2"
-            >
-              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Save Changes'}
-            </button>
-            {message && <p className="mt-4 text-green-700 font-mono text-center">{message}</p>}
-            {error && <p className="mt-4 text-red-700 font-mono text-center">{error}</p>}
-          </div>
-        </form>
-      </div>
+          {/* Bio */}
+          <label
+            htmlFor="bio"
+            className="text-xl font-bold tracking-tight text-black font-mono self-start pt-2"
+          >
+            Bio
+          </label>
+          <textarea
+            id="bio"
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+            disabled={loading}
+            rows={4}
+            className="w-full px-4 py-3 border-b-2 border-black focus:outline-none focus:ring-0 focus:border-red-500 text-black placeholder-gray-400 transition-colors bg-transparent font-mono resize-none"
+            placeholder="Tell us a little about yourself..."
+          />
+        </div>
+
+        {/* Submit */}
+        <div className="pt-8 border-t border-gray-200">
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full px-12 py-4 bg-black text-white font-bold tracking-widest uppercase hover:bg-gray-800 disabled:opacity-50 transition-colors duration-200 font-mono flex items-center justify-center space-x-2"
+          >
+            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Save Changes'}
+          </button>
+          {message && <p className="mt-4 text-green-700 font-mono text-center">{message}</p>}
+          {error && <p className="mt-4 text-red-700 font-mono text-center">{error}</p>}
+        </div>
+      </form>
     </div>
   );
 }
