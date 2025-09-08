@@ -24,11 +24,10 @@ export type Recipe = {
   prep_time: number;
   cook_time: number;
   servings: number;
-  protein: number| null;
-  calories: number| null;
+  protein: number | null;
+  calories: number | null;
   user_id: string;
-  author_id?: string | null;
-  author_name?: string | null;
+  author_id: string | null;
   created_at: string;
   updated_at: string;
 };

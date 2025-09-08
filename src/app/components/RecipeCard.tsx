@@ -4,6 +4,7 @@ import { Recipe } from '../lib/supabase';
 import { X, Clock, User, Users, Edit3, Trash2, Download } from 'lucide-react';
 import { metadata } from '../layout';
 import Link from "next/link";
+import { ProfilePhoto } from './ProfilePhoto';
 
 interface RecipeCardProps {
   
@@ -25,7 +26,7 @@ export function RecipeCard({ recipe, onClick }: RecipeCardProps) {
     
   const printRef = useRef<HTMLDivElement>(null);
 
-  const authorName = recipe.author?.username || recipe.author_name || 'Unknown';
+  const authorName = recipe.author?.username || 'Unknown';
   const authorAvatarUrl = recipe.author?.avatar_url || null;
   return (
     <div 
@@ -49,7 +50,7 @@ export function RecipeCard({ recipe, onClick }: RecipeCardProps) {
       <h3 className="text-xl font-bold tracking-tight text-black uppercase font-mono">
         {recipe.title}
       </h3>
-      {(recipe.author_name || recipe.author_id) && (
+      {recipe.author_id && (
         <div className="text-[11px] uppercase tracking-widest text-black/70 font-mono">
           by {authorName || 'Unknown'}
         </div>
@@ -57,21 +58,14 @@ export function RecipeCard({ recipe, onClick }: RecipeCardProps) {
     </div>
     
     {/* The profile picture on the right side */}
-    <div className="flex-shrink-0 w-10 h-10  hover:scale-150 transition-transform duration-300 rounded-full overflow-hidden border-1 border-black">
-  <Link href={`/profile/${recipe.author_id}`}>
-    {authorAvatarUrl ? (
-      <img
-        src={authorAvatarUrl}
-        alt={`${authorName}'s avatar`}
-        className="w-full h-full object-cover "
-      />
-    ) : (
-      <div className="w-full h-full flex items-center justify-center bg-gray-200">
-        <User className="w-6 h-6 text-gray-500" />
-      </div>
-    )}
-  </Link>
-</div>
+    <ProfilePhoto
+      src={authorAvatarUrl}
+      alt={`${authorName}'s avatar`}
+      size="md"
+      userId={recipe.author_id}
+      showHoverEffect={true}
+      className="hover:scale-150"
+    />
   </div>
 
   {Array.isArray(recipe.tags) && recipe.tags.length > 0 && (

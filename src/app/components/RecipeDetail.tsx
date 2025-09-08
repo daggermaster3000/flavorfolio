@@ -4,6 +4,7 @@ import React, { useRef } from 'react';
 import { Recipe } from '../lib/supabase';
 import { X, Clock, User, Users, Edit3, Trash2, Download } from 'lucide-react';
 import { metadata } from '../layout';
+import { ProfilePhoto } from './ProfilePhoto';
 import { Flame, Droplets } from 'lucide-react'; // Import new icons
 
 interface AuthorDetails {
@@ -23,7 +24,7 @@ export function RecipeDetail({ recipe, onClose, onEdit, onDelete, readOnly }: Re
   const totalTime = recipe.prep_time + recipe.cook_time;
   const printRef = useRef<HTMLDivElement>(null);
 
-  const authorName = recipe.author?.username || recipe.author_name || 'Unknown';
+  const authorName = recipe.author?.username || 'Unknown';
   const authorAvatarUrl = recipe.author?.avatar_url || null;
   console.log(recipe)
   const handleExportPdf = async () => {
@@ -124,19 +125,13 @@ export function RecipeDetail({ recipe, onClose, onEdit, onDelete, readOnly }: Re
           <div className={recipe.image_url ? 'lg:col-span-7' : 'lg:col-span-12'}>
             {/* Author and Title Section */}
             <div className="flex items-center gap-4 mb-6">
-              <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-black flex-shrink-0">
-                {authorAvatarUrl ? (
-                  <img
-                    src={authorAvatarUrl}
-                    alt={`${authorName}'s avatar`}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                    <User className="w-6 h-6 text-gray-500" />
-                  </div>
-                )}
-              </div>
+              <ProfilePhoto
+                src={authorAvatarUrl}
+                alt={`${authorName}'s avatar`}
+                size="lg"
+                userId={recipe.author_id}
+                className="border-2"
+              />
               <div>
                 <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-black uppercase font-mono">
                   {recipe.title}

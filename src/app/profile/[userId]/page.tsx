@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { supabase } from '../../lib/supabase';
-import { Recipe } from '../../lib/supabase';
-import { ArrowLeft } from 'lucide-react';
+import { supabase, Recipe } from '../../lib/supabase';
+import { RecipeCard } from '../../components/RecipeCard';
+import { RecipeDetail } from '../../components/RecipeDetail';
+import { User, ArrowLeft } from 'lucide-react';
+import { ProfilePhoto } from '../../components/ProfilePhoto';
 
 interface Profile {
   id: string;
@@ -80,19 +82,14 @@ export default function ProfilePage() {
       {profile && (
         <div className="flex flex-col items-center text-center mb-10">
           {/* Avatar */}
-          <div className="w-28 h-28 rounded-full overflow-hidden border-2 border-black shadow-sm">
-            {profile.avatar_url ? (
-              <img
-                src={profile.avatar_url}
-                alt={`${profile.username || 'User'}'s avatar`}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500 text-2xl font-bold">
-                ?
-              </div>
-            )}
-          </div>
+          <ProfilePhoto
+            src={profile.avatar_url}
+            alt={`${profile.username || 'User'}'s avatar`}
+            size="xl"
+            userId={profile.id}
+            clickable={false}
+            className="border-2 shadow-sm"
+          />
 
           {/* Username + Bio */}
           <h1 className="text-xl font-bold mt-4 text-black">

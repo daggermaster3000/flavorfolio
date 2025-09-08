@@ -21,7 +21,6 @@ interface RecipeFormProps {
     steps: string[];
     step_items?: Array<{ text: string; image_url?: string | null }> | null;
     tags?: string[];
-    // Add new fields to the initialRecipe type
     calories?: number | null;
     protein?: number | null;
   } | null;
@@ -300,7 +299,7 @@ export function RecipeForm({ onClose, onSuccess, initialRecipe }: RecipeFormProp
         title: formData.title,
         description: formData.description,
         ingredients: ingredients.filter(i => i.trim()),
-        steps: stepImageUrls.map(item => item.text).filter(s => s.trim()), // <-- Corrected line
+        steps: stepImageUrls.map(item => item.text).filter(s => s.trim()),
         step_items: stepImageUrls,
         tags: tags.filter(t => t.trim()),
         image_url: imageUrl,
@@ -310,9 +309,7 @@ export function RecipeForm({ onClose, onSuccess, initialRecipe }: RecipeFormProp
         calories: formData.calories,
         protein: formData.protein,
         user_id: user.id,
-        author_id: user.id,
-        author_name: user.user_metadata?.username || user.email,
-        avatar_url: user.user_metadata?.avatar_url || null,
+        author_id: user.id, // Keep for foreign key relationship to profiles
       };
 
       if (initialRecipe?.id) {

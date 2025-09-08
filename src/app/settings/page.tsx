@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase'; // ✅ adjust the path to your client
-import { User, Camera, Loader2, ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { User, Camera, Loader2, ArrowLeft, Upload } from 'lucide-react';
+import { ProfilePhoto } from '../components/ProfilePhoto';
 
 export default function SettingsPage() {
   const { user, updateProfilePicture } = useAuth();
@@ -139,17 +140,14 @@ export default function SettingsPage() {
           <div className="flex items-center gap-6 md:gap-8">
             <div className="relative group">
               <label htmlFor="avatar-upload" className="cursor-pointer block">
-                {avatarPreview ? (
-                  <img
-                    src={avatarPreview}
-                    alt="User Avatar"
-                    className="w-24 h-24 rounded-full object-cover border-2 border-black transition-all group-hover:scale-105"
-                  />
-                ) : (
-                  <div className="w-24 h-24 rounded-full bg-gray-200 border-2 border-dashed border-gray-400 flex items-center justify-center transition-all group-hover:scale-105">
-                    <User className="w-12 h-12 text-gray-500" />
-                  </div>
-                )}
+                <ProfilePhoto
+                  src={avatarPreview}
+                  alt="User Avatar"
+                  size="lg"
+                  clickable={false}
+                  showHoverEffect={true}
+                  className="border-2 border-dashed border-gray-400"
+                />
                 <div className="absolute inset-0 flex items-center justify-center transition-opacity group-hover:bg-opacity-50">
                   <Camera className="w-8 h-8 text-red opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
