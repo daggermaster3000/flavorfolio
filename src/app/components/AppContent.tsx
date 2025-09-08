@@ -7,6 +7,7 @@ import { Layout } from './Layout';
 import { RecipesDashboard } from './RecipesDashboard';
 import { ExploreFeed } from './ExploreFeed';
 import { motion, AnimatePresence } from 'framer-motion';
+import LandingPage from './LandingPage';
 
 export default function AppContent() {
   const { user, loading } = useAuth();
@@ -23,15 +24,7 @@ export default function AppContent() {
   }
 
   if (!user) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-6">
-        <h1 className="text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">Flavorfolio</h1>
-        <p className="text-gray-600 text-lg mb-10 text-center max-w-md">
-          Curate, explore, and organize your favorite recipes in a clean, minimal, and stylish way.
-        </p>
-        <AuthForm />
-      </div>
-    );
+    return <LandingPage />;
   }
 
   const firstName = user.user_metadata?.username?.split(' ')[0] || user.email?.split('@')[0] || 'My Friend';

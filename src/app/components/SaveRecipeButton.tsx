@@ -72,7 +72,7 @@ export function SaveRecipeButton({ recipeId, className = '' }: SaveRecipeButtonP
     }
   };
 
-  const handleSaveToCollection = async (collectionId?: string) => {
+  const handleSaveToCollection = async (collectionId?: string | null) => {
     if (!user) return;
 
     setLoading(true);
