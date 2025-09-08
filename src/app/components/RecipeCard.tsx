@@ -5,13 +5,13 @@ import { X, Clock, User, Users, Edit3, Trash2, Download } from 'lucide-react';
 import { metadata } from '../layout';
 import Link from "next/link";
 import { ProfilePhoto } from './ProfilePhoto';
+import { SaveRecipeButton } from './SaveRecipeButton';
 
 interface RecipeCardProps {
-  
   onClick: () => void;
   recipe: Recipe & { author?: AuthorDetails };
-  
   readOnly?: boolean;
+  showSaveButton?: boolean;
 }
 interface AuthorDetails {
   username?: string | null;
@@ -21,7 +21,7 @@ interface AuthorDetails {
 
 
 
-export function RecipeCard({ recipe, onClick }: RecipeCardProps) {
+export function RecipeCard({ recipe, onClick, showSaveButton = false }: RecipeCardProps) {
   const totalTime = recipe.prep_time + recipe.cook_time;
     
   const printRef = useRef<HTMLDivElement>(null);
@@ -31,8 +31,14 @@ export function RecipeCard({ recipe, onClick }: RecipeCardProps) {
   return (
     <div 
       onClick={onClick}
-      className="border border-black cursor-pointer hover:bg-gray-50 transition-colors duration-200 group"
+      className="border border-black cursor-pointer hover:bg-gray-50 transition-colors duration-200 group relative"
     >
+      {showSaveButton && (
+        <div className="absolute top-2 right-2 z-[1]">
+          <SaveRecipeButton recipeId={recipe.id} />
+        </div>
+      )}
+      
       {recipe.image_url && (
         <div className="aspect-[4/3] sm:aspect-square overflow-hidden">
           <img 

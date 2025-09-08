@@ -6,7 +6,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { RecipeCard } from './RecipeCard';
 import { RecipeForm } from './RecipeForm';
 import { RecipeDetail } from './RecipeDetail';
-import { Plus, Search } from 'lucide-react';
+import { CollectionsView } from './CollectionsView';
+import { Plus, Search, BookOpen, Bookmark } from 'lucide-react';
 
 
 export function RecipesDashboard() {
@@ -17,6 +18,7 @@ export function RecipesDashboard() {
   const [showForm, setShowForm] = useState(false);
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [editingRecipe, setEditingRecipe] = useState<Recipe | null>(null);
+  const [activeTab, setActiveTab] = useState<'my-recipes' | 'saved-recipes'>('my-recipes');
 
   const loadRecipes = useCallback(async () => {
     if (!user) return;
@@ -87,62 +89,102 @@ export function RecipesDashboard() {
       <div className="mb-8 md:mb-12">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-6">
           <h1 className="text-4xl font-bold tracking-tight text-black uppercase font-mono">
-            Your Recipes
+            Recipes
           </h1>
           
-          <button
-            onClick={() => setShowForm(true)}
-            className="flex items-center space-x-3 px-4 py-2 md:px-6 md:py-3 bg-black text-white font-bold tracking-wide hover:bg-gray-900 transition-colors uppercase font-mono"
-          >
-            <Plus className="w-5 h-5" />
-            <span>Add Recipe</span>
-          </button>
-        </div>
-        
-        {/* Search */}
-        <div className="mt-4 md:mt-8 relative max-w-md">
-          <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search recipes..."
-            className="w-full pl-12 pr-4 py-3 border border-black focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
-          />
-        </div>
-      </div>
-
-      {filteredRecipes.length === 0 ? (
-        <div className="text-center py-24">
-          <div className="text-6xl mb-8">📚</div>
-          <h2 className="text-2xl font-bold tracking-tight text-black mb-4 uppercase font-mono">
-            {recipes.length === 0 ? 'No Recipes Yet' : 'No Matching Recipes'}
-          </h2>
-          <p className="text-gray-600 mb-8 max-w-md mx-auto">
-            {recipes.length === 0 
-              ? 'Start building your recipe collection by adding your first recipe.'
-              : 'Try adjusting your search terms to find recipes.'
-            }
-          </p>
-          {recipes.length === 0 && (
+          {activeTab === 'my-recipes' && (
             <button
               onClick={() => setShowForm(true)}
-              className="px-8 py-3 bg-black text-white font-bold tracking-wide hover:bg-gray-900 transition-colors uppercase font-mono"
+              className="flex items-center space-x-3 px-4 py-2 md:px-6 md:py-3 bg-black text-white font-bold tracking-wide hover:bg-gray-900 transition-colors uppercase font-mono"
             >
-              Add Your First Recipe
+              <Plus className="w-5 h-5" />
+              <span>Add Recipe</span>
             </button>
           )}
         </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-          {filteredRecipes.map((recipe) => (
-            <RecipeCard
-              key={recipe.id}
-              recipe={recipe}
-              onClick={() => setSelectedRecipe(recipe)}
-            />
-          ))}
+
+        {/* Tabs */}
+        <div className="mt-6 border-b border-black">
+          <div className="flex space-x-8">
+            <button
+              onClick={() => setActiveTab('my-recipes')}
+              className={`pb-3 px-1 border-b-2 font-medium text-sm uppercase font-mono tracking-wide transition-colors ${
+                activeTab === 'my-recipes'
+                  ? 'border-black text-black'
+                  : 'border-transparent text-gray-500 hover:text-black'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <BookOpen className="w-4 h-4" />
+                My Recipes
+              </div>
+            </button>
+            <button
+              onClick={() => setActiveTab('saved-recipes')}
+              className={`pb-3 px-1 border-b-2 font-medium text-sm uppercase font-mono tracking-wide transition-colors ${
+                activeTab === 'saved-recipes'
+                  ? 'border-black text-black'
+                  : 'border-transparent text-gray-500 hover:text-black'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <Bookmark className="w-4 h-4" />
+                Saved Recipes
+              </div>
+            </button>
+          </div>
         </div>
+        
+        {/* Search - only show for My Recipes tab */}
+        {activeTab === 'my-recipes' && (
+          <div className="mt-4 md:mt-8 relative max-w-md">
+            <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search recipes..."
+              className="w-full pl-12 pr-4 py-3 border border-black focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+            />
+          </div>
+        )}
+      </div>
+
+      {activeTab === 'my-recipes' ? (
+        filteredRecipes.length === 0 ? (
+          <div className="text-center py-24">
+            <div className="text-6xl mb-8">📚</div>
+            <h2 className="text-2xl font-bold tracking-tight text-black mb-4 uppercase font-mono">
+              {recipes.length === 0 ? 'No Recipes Yet' : 'No Matching Recipes'}
+            </h2>
+            <p className="text-gray-600 mb-8 max-w-md mx-auto">
+              {recipes.length === 0 
+                ? 'Start building your recipe collection by adding your first recipe.'
+                : 'Try adjusting your search terms to find recipes.'
+              }
+            </p>
+            {recipes.length === 0 && (
+              <button
+                onClick={() => setShowForm(true)}
+                className="px-8 py-3 bg-black text-white font-bold tracking-wide hover:bg-gray-900 transition-colors uppercase font-mono"
+              >
+                Add Your First Recipe
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+            {filteredRecipes.map((recipe) => (
+              <RecipeCard
+                key={recipe.id}
+                recipe={recipe}
+                onClick={() => setSelectedRecipe(recipe)}
+              />
+            ))}
+          </div>
+        )
+      ) : (
+        <CollectionsView />
       )}
 
       {/* Recipe Form Modal */}
