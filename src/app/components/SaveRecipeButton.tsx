@@ -25,14 +25,19 @@ export function SaveRecipeButton({ recipeId, className = '' }: SaveRecipeButtonP
     if (!user) return;
 
     const checkSavedStatus = async () => {
-      const { data } = await supabase
-        .from('saved_recipes')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('recipe_id', recipeId)
-        .single();
-      
-      setIsSaved(!!data);
+      try {
+        const { data } = await supabase
+          .from('saved_recipes')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('recipe_id', recipeId)
+          .single();
+        
+        setIsSaved(!!data);
+      } catch (error) {
+        console.log('Collections feature not available - tables not created');
+        setIsSaved(false);
+      }
     };
 
     checkSavedStatus();
@@ -42,13 +47,18 @@ export function SaveRecipeButton({ recipeId, className = '' }: SaveRecipeButtonP
   const loadCollections = async () => {
     if (!user) return;
 
-    const { data } = await supabase
-      .from('collections')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('name');
-
-    setCollections(data || []);
+    try {
+      const { data } = await supabase
+        .from('collections')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('name');
+      
+      setCollections(data || []);
+    } catch (error) {
+      console.log('Collections feature not available - tables not created');
+      setCollections([]);
+    }
   };
 
   const handleSaveClick = async (e: React.MouseEvent) => {
@@ -58,13 +68,17 @@ export function SaveRecipeButton({ recipeId, className = '' }: SaveRecipeButtonP
 
     if (isSaved) {
       // Unsave recipe
-      await supabase
-        .from('saved_recipes')
-        .delete()
-        .eq('user_id', user.id)
-        .eq('recipe_id', recipeId);
-      
-      setIsSaved(false);
+      try {
+        await supabase
+          .from('saved_recipes')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('recipe_id', recipeId);
+        
+        setIsSaved(false);
+      } catch (error) {
+        console.log('Collections feature not available - tables not created');
+      }
     } else {
       // Show collection modal
       await loadCollections();
@@ -90,7 +104,8 @@ export function SaveRecipeButton({ recipeId, className = '' }: SaveRecipeButtonP
       setIsSaved(true);
       setShowCollectionModal(false);
     } catch (error) {
-      console.error('Error saving recipe:', error);
+      console.log('Collections feature not available - tables not created');
+      setShowCollectionModal(false);
     } finally {
       setLoading(false);
     }
@@ -116,7 +131,8 @@ export function SaveRecipeButton({ recipeId, className = '' }: SaveRecipeButtonP
       await handleSaveToCollection(data.id);
       setNewCollectionName('');
     } catch (error) {
-      console.error('Error creating collection:', error);
+      console.log('Collections feature not available - tables not created');
+      setShowCollectionModal(false);
     } finally {
       setLoading(false);
     }

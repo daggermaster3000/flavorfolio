@@ -8,10 +8,11 @@ import { RecipesDashboard } from './RecipesDashboard';
 import { ExploreFeed } from './ExploreFeed';
 import { motion, AnimatePresence } from 'framer-motion';
 import LandingPage from './LandingPage';
+import CircleDashboard from './CircleDashboard';
 
 export default function AppContent() {
   const { user, loading } = useAuth();
-  const [view, setView] = useState<'my' | 'explore'>('my');
+  const [view, setView] = useState<'my' | 'explore' | 'circles'>('my');
 
   if (loading) {
     return (
@@ -50,10 +51,10 @@ export default function AppContent() {
         {/* Call to Action and Navigation */}
         <div className="flex flex-col sm:flex-row justify-center sm:justify-between items-center mt-10 mb-10">
           <div className="flex gap-4">
-            {['my', 'explore'].map((v) => (
+            {['my', 'explore', 'circles'].map((v) => (
               <motion.button
                 key={v}
-                onClick={() => setView(v as 'my' | 'explore')}
+                onClick={() => setView(v as 'my' | 'explore' | 'circles')}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className={`px-5 py-3 text-sm font-semibold tracking-wide uppercase border transition-colors duration-200
@@ -61,7 +62,7 @@ export default function AppContent() {
                     ? 'bg-black text-white border-black'
                     : 'bg-white text-black border-black hover:bg-black hover:text-white'}`}
               >
-                {v === 'my' ? 'My Recipes' : 'Explore'}
+                {v === 'my' ? 'My Recipes' : v === 'explore' ? 'Explore' : 'Food Circles'}
               </motion.button>
             ))}
           </div>
@@ -76,7 +77,7 @@ export default function AppContent() {
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.5}}
           >
-            {view === 'my' ? <RecipesDashboard /> : <ExploreFeed />}
+            {view === 'my' ? <RecipesDashboard /> : view === 'explore' ? <ExploreFeed /> : <CircleDashboard />}
           </motion.div>
         </AnimatePresence>
       </main>

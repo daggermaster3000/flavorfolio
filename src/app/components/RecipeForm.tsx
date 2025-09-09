@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { X, Upload, Plus, Minus, Sparkles, Loader2 } from 'lucide-react';
@@ -42,12 +42,17 @@ export function RecipeForm({ onClose, onSuccess, initialRecipe }: RecipeFormProp
   const [formData, setFormData] = useState({
     title: initialRecipe?.title || '',
     description: initialRecipe?.description || '',
+    ingredients: initialRecipe?.ingredients?.length ? initialRecipe.ingredients : [''],
+    instructions: initialRecipe?.steps?.length ? initialRecipe.steps : [''],
     prep_time: initialRecipe?.prep_time ?? 0,
     cook_time: initialRecipe?.cook_time ?? 0,
     servings: initialRecipe?.servings ?? 1,
-    // Initialize new state fields for calories and protein
-    calories: initialRecipe?.calories ?? null,
-    protein: initialRecipe?.protein ?? null,
+    difficulty: 'easy' as 'easy' | 'medium' | 'hard',
+    tags: Array.isArray(initialRecipe?.tags) ? initialRecipe.tags : [],
+    image_url: initialRecipe?.image_url ?? '',
+    circle_id: '',
+    calories: 0,
+    protein: 0
   });
   
   const [ingredients, setIngredients] = useState(initialRecipe?.ingredients?.length ? initialRecipe.ingredients : ['']);
@@ -60,9 +65,41 @@ export function RecipeForm({ onClose, onSuccess, initialRecipe }: RecipeFormProp
       : (initialRecipe?.steps?.length ? initialRecipe.steps.map((t) => ({ text: t })) : [{ text: '' }])
   );
   const [stepImageFiles, setStepImageFiles] = useState<Array<File | null>>(
-    new Array(stepItems.length).fill(null)
+    Array(stepItems.length).fill(null)
   );
+  
+  // Circle selection state
+  const [userCircles, setUserCircles] = useState<any[]>([]);
 
+  // Load user's circles on component mount
+  useEffect(() => {
+    const loadUserCircles = async () => {
+      if (!user) return;
+
+      try {
+        const { data: membershipData, error } = await supabase
+          .from('circle_memberships')
+          .select(`
+            circles (
+              id,
+              name,
+              type
+            )
+          `)
+          .eq('user_id', user.id)
+          .eq('status', 'active');
+
+        if (error) throw error;
+
+        const circles = membershipData?.map(m => m.circles).filter(Boolean) || [];
+        setUserCircles(circles as any[]);
+      } catch (error) {
+        console.error('Error loading user circles:', error);
+      }
+    };
+
+    loadUserCircles();
+  }, [user]);
 
   // Function to parse TikTok recipe
   const parseTikTokRecipe = async () => {
@@ -96,7 +133,8 @@ export function RecipeForm({ onClose, onSuccess, initialRecipe }: RecipeFormProp
       `;
 
       // Populate the form with parsed data, including new fields
-      setFormData({
+      setFormData(prev => ({
+        ...prev,
         title: recipeData.title,
         description: htmlDescription,
         prep_time: recipeData.prep_time,
@@ -104,7 +142,7 @@ export function RecipeForm({ onClose, onSuccess, initialRecipe }: RecipeFormProp
         servings: recipeData.servings,
         calories: recipeData.calories, // Populate new fields
         protein: recipeData.protein, // Populate new fields
-      });
+      }));
       
       setIngredients(recipeData.ingredients.length > 0 ? recipeData.ingredients : ['']);
       setSteps(recipeData.steps.length > 0 ? recipeData.steps : ['']);
@@ -157,15 +195,16 @@ export function RecipeForm({ onClose, onSuccess, initialRecipe }: RecipeFormProp
       const recipeData = await response.json();
 
       // Populate the form with parsed data
-      setFormData({
+      setFormData(prev => ({
+        ...prev,
         title: recipeData.title || '',
         description: recipeData.description || '',
         prep_time: recipeData.prep_time || 0,
         cook_time: recipeData.cook_time || 0,
         servings: recipeData.servings || 1,
-        calories: recipeData.calories || null,
-        protein: recipeData.protein || null,
-      });
+        calories: recipeData.calories || 0,
+        protein: recipeData.protein || 0,
+      }));
       setIngredients(recipeData.ingredients?.length > 0 ? recipeData.ingredients : ['']);
       setSteps(recipeData.steps?.length > 0 ? recipeData.steps : ['']);
       setStepItems(recipeData.steps?.length > 0 ? recipeData.steps.map((s: string) => ({ text: s })) : [{ text: '' }]);
@@ -310,6 +349,7 @@ export function RecipeForm({ onClose, onSuccess, initialRecipe }: RecipeFormProp
         protein: formData.protein,
         user_id: user.id,
         author_id: user.id, // Keep for foreign key relationship to profiles
+        circle_id: formData.circle_id || null, // Add circle association
       };
 
       if (initialRecipe?.id) {
@@ -487,6 +527,26 @@ export function RecipeForm({ onClose, onSuccess, initialRecipe }: RecipeFormProp
           
           <div>
             <label className="block text-sm font-bold tracking-wide text-black uppercase mb-2 font-mono">
+              Post to Circle (Optional)
+            </label>
+            <select
+              value={formData.circle_id}
+              onChange={(e) => setFormData({ ...formData, circle_id: e.target.value })}
+              className="w-full px-4 py-3 border border-black focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+            >
+              <option value="">Share publicly (no circle)</option>
+              {userCircles.map((circle: any) => (
+                <option key={circle.id} value={circle.id}>
+                  {circle.name} ({circle.type})
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div>
+            <label className="block text-sm font-bold tracking-wide text-black uppercase mb-2 font-mono">
               Servings
             </label>
             <input
@@ -536,7 +596,7 @@ export function RecipeForm({ onClose, onSuccess, initialRecipe }: RecipeFormProp
             <input
               type="number"
               value={formData.calories ?? ''}
-              onChange={(e) => setFormData({ ...formData, calories: parseInt(e.target.value) || null })}
+              onChange={(e) => setFormData({ ...formData, calories: parseInt(e.target.value) || 0 })}
               min="0"
               className="w-full px-4 py-3 border border-black focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
               placeholder="e.g., 450"
@@ -550,7 +610,7 @@ export function RecipeForm({ onClose, onSuccess, initialRecipe }: RecipeFormProp
             <input
               type="number"
               value={formData.protein ?? ''}
-              onChange={(e) => setFormData({ ...formData, protein: parseInt(e.target.value) || null })}
+              onChange={(e) => setFormData({ ...formData, protein: parseInt(e.target.value) || 0 })}
               min="0"
               className="w-full px-4 py-3 border border-black focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
               placeholder="e.g., 30"

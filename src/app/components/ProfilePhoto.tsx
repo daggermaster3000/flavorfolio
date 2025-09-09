@@ -41,18 +41,37 @@ export function ProfilePhoto({
   const hoverClasses = showHoverEffect ? 'hover:scale-105 transition-transform duration-300' : '';
   const combinedClasses = `${baseClasses} ${hoverClasses} ${className}`;
 
+  // Generate a colorful avatar based on the alt text or userId
+  const generateAvatar = () => {
+    const colors = [
+      'bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500', 
+      'bg-purple-500', 'bg-pink-500', 'bg-indigo-500', 'bg-teal-500'
+    ];
+    const text = alt || userId || 'U';
+    const colorIndex = text.charCodeAt(0) % colors.length;
+    const initial = text.charAt(0).toUpperCase();
+    
+    return (
+      <div className={`w-full h-full flex items-center justify-center text-white font-bold ${colors[colorIndex]}`}>
+        {initial}
+      </div>
+    );
+  };
+
   const content = (
     <div className={combinedClasses}>
-      {src ? (
+      {src && src !== 'null' ? (
         <img
           src={src}
           alt={alt}
           className="w-full h-full object-cover"
+          onError={() => {
+            // On error, React will re-render with src as null/undefined
+            console.log('Avatar image failed to load:', src);
+          }}
         />
       ) : (
-        <div className="w-full h-full flex items-center justify-center bg-gray-200">
-          <User className={`${iconSizeClasses[size]} text-gray-500`} />
-        </div>
+        generateAvatar()
       )}
     </div>
   );

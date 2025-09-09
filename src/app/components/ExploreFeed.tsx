@@ -2,11 +2,13 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { supabase, Recipe } from '../lib/supabase';
+import { useAuth } from '../contexts/AuthContext';
 import { RecipeCard } from './RecipeCard';
 import { RecipeDetail } from './RecipeDetail';
 import { Search } from 'lucide-react';
 
 export function ExploreFeed() {
+  const { user } = useAuth();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -15,7 +17,7 @@ export function ExploreFeed() {
   // Corrected loadAllRecipes function
 const loadAllRecipes = async () => {
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('recipes')
       .select(
         `
@@ -27,6 +29,13 @@ const loadAllRecipes = async () => {
       `
       )
       .order('created_at', { ascending: false });
+
+    // Filter out user's own recipes if logged in
+    if (user) {
+      query = query.neq('user_id', user.id);
+    }
+
+    const { data, error } = await query;
 
     if (error) throw error;
     setRecipes(data || []);
