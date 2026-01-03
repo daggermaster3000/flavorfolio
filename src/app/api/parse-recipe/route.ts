@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Step 2: Get description
-    let description: string | null = await getTikTokDescription(resolvedUrl);
+    const description: string | null = await getTikTokDescription(resolvedUrl);
     let recipeSource: string | null = null;
 
     if (description && looksLikeRecipe(description)) {
