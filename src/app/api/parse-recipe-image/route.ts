@@ -46,6 +46,7 @@ export async function POST(request: NextRequest) {
       - If a value is missing (protein, calories, servings), make a reasonable estimate.
       - Preserve **all steps from the recipe** in the same logical order, even if they seem redundant.
       - If steps are unclear or merged, split them into clear cooking actions.
+      - If multiple parts of the recipe are specified in the description or the ingredients (eg. batter, sauce, ...), specify in steps by providing the part in parentheses.
 
       Formatting rules:
       - title: short string
@@ -78,23 +79,58 @@ export async function POST(request: NextRequest) {
         },
       ],
       temperature: 0.3,
-      max_tokens: 1000,
+      max_tokens: 2000,
       response_format: { type: "json_object" },
     });
 
-    // 5. Parse and return the response
-    const rawContent = response.choices[0].message.content;
-    if (!rawContent) {
-      return NextResponse.json({ error: "AI did not return any content." }, { status: 500 });
+    // 5. Validate and parse the response
+    if (!response || !response.choices || response.choices.length === 0) {
+      console.error("OpenAI API returned empty choices array:", response);
+      return NextResponse.json({ error: "AI did not return any content. Please try again." }, { status: 500 });
     }
-    
-    const recipeData = JSON.parse(rawContent);
 
-    console.log(recipeData);
+    const firstChoice = response.choices[0];
+    if (!firstChoice || !firstChoice.message) {
+      console.error("OpenAI API response missing message:", response);
+      return NextResponse.json({ error: "AI response was malformed. Please try again." }, { status: 500 });
+    }
+
+    const rawContent = firstChoice.message.content;
+    if (!rawContent || rawContent.trim().length === 0) {
+      console.error("OpenAI API returned empty content:", response);
+      return NextResponse.json({ error: "AI did not return any content. Please try again with a clearer image." }, { status: 500 });
+    }
+
+    // 6. Parse the JSON response
+    let recipeData: ParsedRecipeData;
+    try {
+      recipeData = JSON.parse(rawContent);
+    } catch (parseError) {
+      console.error("Failed to parse AI response as JSON:", rawContent, parseError);
+      return NextResponse.json({ error: "AI returned invalid JSON. Please try again." }, { status: 500 });
+    }
+
+    console.log("Successfully parsed recipe data:", recipeData);
     return NextResponse.json(recipeData);
 
   } catch (error) {
     console.error("Error parsing recipe from image:", error);
-    return NextResponse.json({ error: "Internal server error." }, { status: 500 });
+    
+    // Provide more specific error messages based on error type
+    if (error instanceof Error) {
+      // Check for OpenAI API specific errors
+      if (error.message.includes('API key')) {
+        return NextResponse.json({ error: "OpenAI API key is missing or invalid." }, { status: 500 });
+      }
+      if (error.message.includes('rate limit')) {
+        return NextResponse.json({ error: "Rate limit exceeded. Please try again in a moment." }, { status: 429 });
+      }
+      if (error.message.includes('invalid image')) {
+        return NextResponse.json({ error: "Invalid image format. Please upload a valid image file." }, { status: 400 });
+      }
+      return NextResponse.json({ error: error.message || "Failed to parse recipe from image." }, { status: 500 });
+    }
+    
+    return NextResponse.json({ error: "Internal server error. Please try again." }, { status: 500 });
   }
 }
